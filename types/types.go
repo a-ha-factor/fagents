@@ -1,7 +1,7 @@
 package types
 
 type Fagent struct {
-	Id        int
+	Id        string
 	FullName  string
 	Dob       string
 	Ogrn      string
@@ -16,3 +16,5 @@ type Fagent struct {
 	DatePubl  string
 	DateOut   string
 }
+
+type FagentsList []Fagent

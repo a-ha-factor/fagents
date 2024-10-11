@@ -3,46 +3,29 @@ package main
 import (
 	"database/sql"
 	"fagents/db"
-	"fagents/types"
+	"fagents/tg"
 	"fmt"
-	"os"
 
-	_ "github.com/mattn/go-sqlite3"
-)
-
-var (
-	conn        *sql.DB
-	fagentsList []types.Fagent
-	searchText  string
+	_ "modernc.org/sqlite"
+	//_ "github.com/mattn/go-sqlite3"
 )
 
 func main() {
-	conn, err := sql.Open("sqlite3", "./db/fagents.sqlite")
+	conn, err := sql.Open("sqlite", "./db/fagents.sqlite")
 	if err != nil {
-		os.Exit(1)
+		panic(err)
 	}
 	defer conn.Close()
 
-	fmt.Print("Условие поиска: ")
-	fmt.Scanln(&searchText)
-	fmt.Println("Поиск по условию:", searchText)
+	db.DBConn = conn
 
-	fagentsList, err := db.FagentsList(conn, searchText)
+	queryText := "SELECT * FROM fagents WHERE fullName LIKE ? OR inn LIKE ? OR members LIKE ?"
+	db.Statement, err = db.DBConn.Prepare(queryText)
 	if err != nil {
-		fmt.Println("Ошибка при поиске", err)
-		os.Exit(1)
+		fmt.Println(err)
+		panic(err)
 	}
+	defer db.Statement.Close()
 
-	sendToTg(fagentsList)
-
-}
-
-func sendToTg(faList []types.Fagent) {
-	if len(faList) == 0 {
-		fmt.Println("Ничего не найдено")
-	} else {
-		for i, v := range faList {
-			fmt.Println(i, v.Inn, v.FullName)
-		}
-	}
+	tg.InitBot()
 }

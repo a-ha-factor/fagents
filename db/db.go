@@ -2,17 +2,26 @@ package db
 
 import (
 	"database/sql"
+	"errors"
 	"fagents/types"
 	"fmt"
 	"strings"
 )
 
-func FagentsList(db *sql.DB, searchText string) ([]types.Fagent, error) {
-	queryText := "SELECT * FROM fagents WHERE upper(fullName) LIKE '%" + strings.ToUpper(searchText) + "%' OR inn LIKE '%" + searchText + "%'"
-	//queryText := "SELECT id, upper(fullName), dob, ogrn, inn, regNum, snils, address, resources, members, law, dateIn, datePubl, dateOut FROM fagents WHERE upper(fullName) LIKE '%" + strings.ToUpper(searchText) + "%' OR inn LIKE '%" + searchText + "%'"
-	fmt.Println(queryText)
-	rows, err := db.Query(queryText)
+var (
+	DBConn *sql.DB
+	Statement *sql.Stmt
+	err error
+)
+
+func FagentsList(searchText string) (types.FagentsList, error) {
+	if len(searchText) < 4 || len(searchText) > 30 {
+		return nil, errors.New("неверная длина запроса")
+	}
+
+	rows, err := Statement.Query("%"+strings.ToUpper(searchText)+"%", "%"+searchText+"%", "%"+strings.ToUpper(searchText)+"%")
 	if err != nil {
+		fmt.Println(err)
 		return nil, err
 	}
 	defer rows.Close()
