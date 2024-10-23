@@ -13,6 +13,7 @@ import (
 )
 
 // Send any text message to the bot after the bot has been started
+var FagentsBotToken string
 
 func InitBot() {
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
@@ -22,11 +23,11 @@ func InitBot() {
 		bot.WithDefaultHandler(searchDialogHandler),
 	}
 
-	b, err := bot.New(os.Getenv("FAGENTS_TELEGRAM_BOT_TOKEN"), opts...)
+	b, err := bot.New(FagentsBotToken, opts...)
 	if nil != err {
 		// panics for the sake of simplicity.
 		// you should handle this error properly in your code.
-		panic(err)
+		panic("Bot token is incorrect")
 	}
 
 	b.RegisterHandler(bot.HandlerTypeMessageText, "/start", bot.MatchTypeExact, startHelpHandler)

@@ -5,19 +5,36 @@ import (
 	"fagents/db"
 	"fagents/tg"
 	"fmt"
+	"os"
+	"path/filepath"
 
 	_ "modernc.org/sqlite"
 	//_ "github.com/mattn/go-sqlite3"
 )
 
 func main() {
-	conn, err := sql.Open("sqlite", "./db/fagents.sqlite")
+	var (
+		err  error
+		path string
+	)
+
+	if len(os.Args) < 2 {
+		panic("Bot token not specified")
+	}
+
+	tg.FagentsBotToken = os.Args[1]
+	path, err = os.Executable()
 	if err != nil {
 		panic(err)
 	}
-	defer conn.Close()
 
-	db.DBConn = conn
+	path = filepath.Dir(path)
+
+	db.DBConn, err = sql.Open("sqlite", path+"/db/fagents.sqlite")
+	if err != nil {
+		panic(err)
+	}
+	defer db.DBConn.Close()
 
 	queryText := "SELECT * FROM fagents WHERE fullName LIKE ? OR inn LIKE ? OR members LIKE ?"
 	db.Statement, err = db.DBConn.Prepare(queryText)

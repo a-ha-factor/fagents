@@ -9,12 +9,13 @@ import (
 )
 
 var (
-	DBConn *sql.DB
+	DBConn    *sql.DB
 	Statement *sql.Stmt
-	err error
 )
 
 func FagentsList(searchText string) (types.FagentsList, error) {
+	var err error
+
 	if len(searchText) < 4 || len(searchText) > 30 {
 		return nil, errors.New("неверная длина запроса")
 	}
